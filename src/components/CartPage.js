@@ -15,12 +15,23 @@ import {
   MDBTooltip,
   MDBTypography,
 } from "mdb-react-ui-kit";
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getCartTotal,
+  removeItem,
+  IncreaseItemQuantity,
+  DecreaseItemQuantity,
+} from "../features/cartSlice";
 
 export default function CartPage() {
   const cartItems = useSelector((state) => state.allCarts);
   console.log(cartItems);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getCartTotal());
+  }, [cartItems.cart]);
+
   return (
     <section className="h-100 gradient-custom">
       <MDBContainer className="py-5 h-100">
@@ -29,7 +40,7 @@ export default function CartPage() {
             <MDBCard className="mb-4">
               <MDBCardHeader className="py-3">
                 <MDBTypography tag="h5" className="mb-0">
-                  Cart - 2 items
+                  Cart - {cartItems.cart.length} items
                 </MDBTypography>
               </MDBCardHeader>
               <MDBCardBody>
@@ -56,10 +67,9 @@ export default function CartPage() {
                           </a>
                         </MDBRipple>
                       </MDBCol>
-
                       <MDBCol lg="5" md="6" className=" mb-4 mb-lg-0">
                         <p>
-                          <strong>Red hoodie</strong>
+                          <strong>{item.title}</strong>
                         </p>
                         <p>Color: red</p>
                         <p>Size: M</p>
@@ -69,46 +79,61 @@ export default function CartPage() {
                           wrapperClass="me-1 mb-2"
                           title="Remove item"
                         >
-                          <MDBIcon fas icon="trash" />
+                          <MDBIcon
+                            onClick={() => dispatch(removeItem(item.id))}
+                            fas
+                            icon="trash"
+                          />
                         </MDBTooltip>
 
-                        <MDBTooltip
+                        {/* <MDBTooltip
                           wrapperProps={{ size: "sm", color: "danger" }}
                           wrapperClass="me-1 mb-2"
                           title="Move to the wish list"
                         >
                           <MDBIcon fas icon="heart" />
-                        </MDBTooltip>
+                        </MDBTooltip> */}
                       </MDBCol>
                       <MDBCol lg="4" md="6" className="mb-4 mb-lg-0">
                         <div
                           className="d-flex mb-4"
                           style={{ maxWidth: "300px" }}
                         >
-                          <MDBBtn className="px-3 me-2">
+                          <MDBBtn
+                            className="px-3 me-2"
+                            onClick={() =>
+                              dispatch(DecreaseItemQuantity(item.id))
+                            }
+                          >
                             <MDBIcon fas icon="minus" />
                           </MDBBtn>
 
                           <MDBInput
-                            defaultValue={1}
+                            // defaultValue={1}
+                            value={item.quantity}
                             min={0}
                             type="number"
                             label="Quantity"
                           />
 
-                          <MDBBtn className="px-3 ms-2">
+                          <MDBBtn
+                            className="px-3 ms-2"
+                            onClick={() =>
+                              dispatch(IncreaseItemQuantity(item.id))
+                            }
+                          >
                             <MDBIcon fas icon="plus" />
                           </MDBBtn>
                         </div>
 
                         <p className="text-start text-md-center">
-                          <strong>$17.99</strong>
+                          <strong>{item.price}$</strong>
                         </p>
                       </MDBCol>
+                      <hr className="my-4" />
                     </MDBRow>
                   );
                 })}
-                <hr className="my-4" />
               </MDBCardBody>
             </MDBCard>
           </MDBCol>
@@ -121,23 +146,28 @@ export default function CartPage() {
               </MDBCardHeader>
               <MDBCardBody>
                 <MDBListGroup flush>
-                  <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                  {/* <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 pb-0">
                     Products
-                    <span>$53.98</span>
+                    <span>{cartItems.quantity}</span>
                   </MDBListGroupItem>
                   <MDBListGroupItem className="d-flex justify-content-between align-items-center px-0">
                     Shipping
                     <span>Gratis</span>
+                  </MDBListGroupItem> */}
+                  <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                    <div>
+                      <strong>Total Quantity</strong>
+                    </div>
+                    <span>
+                      <strong>{cartItems.totalQuantity}</strong>
+                    </span>
                   </MDBListGroupItem>
                   <MDBListGroupItem className="d-flex justify-content-between align-items-center border-0 px-0 mb-3">
                     <div>
                       <strong>Total amount</strong>
-                      <strong>
-                        <p className="mb-0">(including VAT)</p>
-                      </strong>
                     </div>
                     <span>
-                      <strong>$53.98</strong>
+                      <strong>{cartItems.totalPrice}</strong>
                     </span>
                   </MDBListGroupItem>
                 </MDBListGroup>
